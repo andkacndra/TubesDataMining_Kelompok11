@@ -5,7 +5,7 @@ import pickle
 
 # Set konfigurasi halaman dashboard
 st.set_page_config(page_title="E-commerce Customer Satisfaction Predictor", layout="centered")
-st.title("📊 E-commerce Customer Satisfaction Predictor")
+st.title("E-commerce Customer Satisfaction Predictor")
 st.write("Aplikasi ini memprediksi tingkat kepuasan pelanggan berdasarkan model Logistic Regression kelompok kami.")
 
 # Fungsi untuk memuat model dan scaler .pkl
@@ -81,7 +81,7 @@ if st.button("🔮 Prediksi Kepuasan Pelanggan"):
     prediction = model.predict(df_input_scaled)[0]
     
     # Tampilkan Hasil Visual di Web
-    st.subheader("🎯 Hasil Analisis Model:")
+    st.subheader("Hasil Analisis Model:")
     if prediction == 0:
         st.error("❌ Hasil Prediksi: **UNSATISFIED** (Pelanggan Tidak Puas)")
     elif prediction == 1:
