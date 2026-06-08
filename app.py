@@ -5,7 +5,7 @@ import pickle
 
 # 1. JUDUL UTAMA APLIKASI
 st.set_page_config(page_title="E-commerce Loyalty Program & Membership Predictor", layout="centered")
-st.title("📊 E-commerce Loyalty Program & Membership Predictor")
+st.title("E-commerce Loyalty Program & Membership Predictor")
 
 # 2. KETERANGAN DESKRIPSI
 st.write("Aplikasi ini memprediksi tingkat keanggotaan/loyalitas pelanggan baru berdasarkan model Logistic Regression kelompok kami.")
@@ -48,7 +48,7 @@ with col2:
 city = st.selectbox("Kota Tempat Tinggal (City)", ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"])
 
 # --- PROSES TOMBOL EKSEKUSI ---
-if st.button("🔮 Analisis Tingkat Keanggotaan"):
+if st.button("Analisis Tingkat Keanggotaan"):
     
     # Mapping Data Sesuai Aturan Encoding
     gender_encoded = 0 if gender == "Female" else 1
@@ -88,10 +88,10 @@ if st.button("🔮 Analisis Tingkat Keanggotaan"):
     prediction = model.predict(df_input_scaled)[0]
     
     # OUTPUT HASIL PREDIKSI (BRONZE, SILVER, GOLD)
-    st.subheader("🎯 Hasil Analisis Model:")
+    st.subheader("Hasil Analisis Model:")
     if prediction == 0:
-        st.error("🥉 Hasil Prediksi: **BRONZE MEMBER**")
+        st.error("Hasil Prediksi: **BRONZE MEMBER**")
     elif prediction == 1:
-        st.warning("🥈 Hasil Prediksi: **SILVER MEMBER**")
+        st.warning("Hasil Prediksi: **SILVER MEMBER**")
     else:
-        st.success("🥇 Hasil Prediksi: **GOLD MEMBER**")
+        st.success("Hasil Prediksi: **GOLD MEMBER**")
