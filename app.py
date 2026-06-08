@@ -61,27 +61,27 @@ if st.button("🔮 Analisis Tingkat Keanggotaan"):
     
     # Inisialisasi One-Hot Encoding Kota
     cities = ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"]
-    city_dict = {f"City_{c}": 0 for f in cities}
+    # FIXED: Mengubah 'for f in cities' menjadi 'for c in cities' agar variabel 'c' terbaca sempurna
+    city_dict = {f"City_{c}": 0 for c in cities}
     city_dict[f"City_{city}"] = 1
     
-    # CRITICAL FIX: Nama key dikembalikan ke susunan asli Vian ('Membership Type' & 'Satisfaction Level') 
-    # tapi nilainya ditukar secara silang agar logikanya sesuai revisi ketua kelompokmu!
+    # Susunan asli kolom Vian agar scaler.transform tidak komplain nama kolom berbeda
     input_data = {
         'Gender': gender_encoded,
         'Age': age,
-        'Membership Type': satisfaction_encoded, # Posisi kolom ke-3 diisi data kepuasan
+        'Membership Type': satisfaction_encoded,  # Mengisi posisi kolom latih dengan data input kepuasan
         'Total Spend': total_spend,
         'Items Purchased': items,
         'Average Rating': rating,
         'Discount Applied': discount_encoded,
-        'Days Since Last Purchase': 2,           # Diisi dummy angka konstan untuk posisi Satisfaction Level lama
+        'Days Since Last Purchase': days_since,
         **city_dict
     }
     
     # Ubah ke DataFrame
     df_input = pd.DataFrame([input_data])
     
-    # Standardisasi data menggunakan scaler bawaan (Sekarang nama kolom sudah cocok 100%)
+    # Standardisasi data menggunakan scaler bawaan
     df_input_scaled = scaler.transform(df_input)
     
     # Prediksi menggunakan model Logistic Regression
@@ -90,8 +90,8 @@ if st.button("🔮 Analisis Tingkat Keanggotaan"):
     # OUTPUT HASIL PREDIKSI (BRONZE, SILVER, GOLD)
     st.subheader("🎯 Hasil Analisis Model:")
     if prediction == 0:
-        st.error("指标 Hasil Prediksi: **BRONZE MEMBER**")
+        st.error("🥉 Hasil Prediksi: **BRONZE MEMBER**")
     elif prediction == 1:
-        st.warning("指标 Hasil Prediksi: **SILVER MEMBER**")
+        st.warning("🥈 Hasil Prediksi: **SILVER MEMBER**")
     else:
-        st.success("指标 Hasil Prediksi: **GOLD MEMBER**")
+        st.success("🥇 Hasil Prediksi: **GOLD MEMBER**")
