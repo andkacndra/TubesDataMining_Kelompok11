@@ -3,12 +3,13 @@ import pandas as pd
 import numpy as np
 import pickle
 
-# Set konfigurasi halaman dashboard
-st.set_page_config(page_title="E-commerce Customer Satisfaction Predictor", layout="centered")
-st.title("E-commerce Customer Satisfaction Predictor")
-st.write("Aplikasi ini memprediksi tingkat kepuasan pelanggan berdasarkan model Logistic Regression kelompok kami.")
+# judul dan deskripsi aplikasi
+st.set_page_config(page_title="E-commerce Loyalty Program & Membership Predictor", layout="centered")
+st.title("📊 E-commerce Loyalty Program & Membership Predictor")
 
-# Fungsi untuk memuat model dan scaler .pkl
+st.write("Aplikasi ini memprediksi tingkat keanggotaan/loyalitas pelanggan baru berdasarkan model Logistic Regression kelompok kami.")
+
+# load model dan scaler .pkl
 @st.cache_resource
 def load_models():
     with open('model_logreg.pkl', 'rb') as f_model:
@@ -30,7 +31,10 @@ col1, col2 = st.columns(2)
 with col1:
     gender = st.selectbox("Jenis Kelamin (Gender)", ["Female", "Male"])
     age = st.number_input("Umur (Age)", min_value=1, max_value=100, value=30)
-    membership = st.selectbox("Tipe Keanggotaan (Membership Type)", ["Bronze", "Silver", "Gold"])
+    
+    # MENU INPUT YANG TERTUKAR (Sekarang menginput Satisfaction Level)
+    satisfaction = st.selectbox("Tingkat Kepuasan Pelanggan (Satisfaction Level)", ["Unsatisfied", "Neutral", "Satisfied"])
+    
     total_spend = st.number_input("Total Pengeluaran (Total Spend $)", min_value=0.0, value=500.0)
 
 with col2:
@@ -39,30 +43,32 @@ with col2:
     discount = st.selectbox("Mendapatkan Diskon? (Discount Applied)", ["No", "Yes"])
     days_since = st.number_input("Hari Sejak Transaksi Terakhir (Days Since Last Purchase)", min_value=0, value=15)
 
-# Pilihan kota sesuai One-Hot Encoding Okta
+# Pilihan kota
 city = st.selectbox("Kota Tempat Tinggal (City)", ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"])
 
-# --- PROSES TOMBOL PREDIKSI ---
-if st.button("🔮 Prediksi Kepuasan Pelanggan"):
+# TOMBOL EKSEKUSI
+if st.button("🔮 Analisis Tingkat Keanggotaan"):
     
-    # Mapping Data Sesuai Aturan Encoding Okta
+    # Mapping Data Sesuai Aturan Encoding
     gender_encoded = 0 if gender == "Female" else 1
     discount_encoded = 1 if discount == "Yes" else 0
     
-    if membership == "Bronze": membership_encoded = 1
-    elif membership == "Silver": membership_encoded = 2
-    else: membership_encoded = 3
+    # Penukaran logika encoding posisi variabel
+    if satisfaction == "Unsatisfied": satisfaction_encoded = 0
+    elif satisfaction == "Neutral": satisfaction_encoded = 1
+    else: satisfaction_encoded = 2
     
-    # Inisialisasi One-Hot Encoding Kota menjadi 0 semua
+    # Inisialisasi One-Hot Encoding Kota
     cities = ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"]
-    city_dict = {f"City_{c}": 0 for c in cities}
+    city_dict = {f"City_{c}": 0 for f in cities}
     city_dict[f"City_{city}"] = 1
     
-    # Satukan data sesuai urutan kolom dataset asli Vian
+    # Masukkan data ke array sesuai dengan susunan fitur latih model Vian
+    # Posisi input ditukar: yang dikirim ke model adalah nilai satisfaction_encoded
     input_data = {
         'Gender': gender_encoded,
         'Age': age,
-        'Membership Type': membership_encoded,
+        'Membership Type': satisfaction_encoded,  # Mengisi posisi kolom latih model dengan input kepuasan
         'Total Spend': total_spend,
         'Items Purchased': items,
         'Average Rating': rating,
@@ -71,20 +77,19 @@ if st.button("🔮 Prediksi Kepuasan Pelanggan"):
         **city_dict
     }
     
-    # Ubah menjadi DataFrame
     df_input = pd.DataFrame([input_data])
     
-    # Standardisasi data menggunakan scaler bawaan Vian
+    # Standardisasi data menggunakan scaler bawaan
     df_input_scaled = scaler.transform(df_input)
     
     # Prediksi menggunakan model Logistic Regression
     prediction = model.predict(df_input_scaled)[0]
     
-    # Tampilkan Hasil Visual di Web
-    st.subheader("Hasil Analisis Model:")
+    # OUTPUT HASIL PREDREDIKSI DI PALING BAWAH (BRONZE, SILVER, GOLD)
+    st.subheader("🎯 Hasil Analisis Model:")
     if prediction == 0:
-        st.error("❌ Hasil Prediksi: **UNSATISFIED** (Pelanggan Tidak Puas)")
+        st.error("🥉 Hasil Prediksi: **BRONZE MEMBER**")
     elif prediction == 1:
-        st.warning("😐 Hasil Prediksi: **NEUTRAL** (Pelanggan Biasa Saja)")
+        st.warning("🥈 Hasil Prediksi: **SILVER MEMBER**")
     else:
-        st.success("✅ Hasil Prediksi: **SATISFIED** (Pelanggan Sangat Puas!)")
+        st.success("🥇 Hasil Prediksi: **GOLD MEMBER**")
