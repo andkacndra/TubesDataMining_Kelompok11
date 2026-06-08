@@ -3,13 +3,14 @@ import pandas as pd
 import numpy as np
 import pickle
 
-# judul dan deskripsi aplikasi
+# 1. JUDUL UTAMA APLIKASI
 st.set_page_config(page_title="E-commerce Loyalty Program & Membership Predictor", layout="centered")
 st.title("📊 E-commerce Loyalty Program & Membership Predictor")
 
+# 2. KETERANGAN DESKRIPSI
 st.write("Aplikasi ini memprediksi tingkat keanggotaan/loyalitas pelanggan baru berdasarkan model Logistic Regression kelompok kami.")
 
-# load model dan scaler .pkl
+# Load model dan scaler .pkl
 @st.cache_resource
 def load_models():
     with open('model_logreg.pkl', 'rb') as f_model:
@@ -32,7 +33,7 @@ with col1:
     gender = st.selectbox("Jenis Kelamin (Gender)", ["Female", "Male"])
     age = st.number_input("Umur (Age)", min_value=1, max_value=100, value=30)
     
-    # MENU INPUT YANG TERTUKAR (Sekarang menginput Satisfaction Level)
+    # Input dari user berupa tingkat kepuasan (sesuai revisi ketua)
     satisfaction = st.selectbox("Tingkat Kepuasan Pelanggan (Satisfaction Level)", ["Unsatisfied", "Neutral", "Satisfied"])
     
     total_spend = st.number_input("Total Pengeluaran (Total Spend $)", min_value=0.0, value=500.0)
@@ -46,14 +47,14 @@ with col2:
 # Pilihan kota
 city = st.selectbox("Kota Tempat Tinggal (City)", ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"])
 
-# TOMBOL EKSEKUSI
+# --- PROSES TOMBOL EKSEKUSI ---
 if st.button("🔮 Analisis Tingkat Keanggotaan"):
     
     # Mapping Data Sesuai Aturan Encoding
     gender_encoded = 0 if gender == "Female" else 1
     discount_encoded = 1 if discount == "Yes" else 0
     
-    # Penukaran logika encoding posisi variabel
+    # Konversi teks kepuasan menjadi angka untuk dikirim ke posisi latih awal model
     if satisfaction == "Unsatisfied": satisfaction_encoded = 0
     elif satisfaction == "Neutral": satisfaction_encoded = 1
     else: satisfaction_encoded = 2
@@ -63,33 +64,34 @@ if st.button("🔮 Analisis Tingkat Keanggotaan"):
     city_dict = {f"City_{c}": 0 for f in cities}
     city_dict[f"City_{city}"] = 1
     
-    # Masukkan data ke array sesuai dengan susunan fitur latih model Vian
-    # Posisi input ditukar: yang dikirim ke model adalah nilai satisfaction_encoded
+    # CRITICAL FIX: Nama key dikembalikan ke susunan asli Vian ('Membership Type' & 'Satisfaction Level') 
+    # tapi nilainya ditukar secara silang agar logikanya sesuai revisi ketua kelompokmu!
     input_data = {
         'Gender': gender_encoded,
         'Age': age,
-        'Membership Type': satisfaction_encoded,  # Mengisi posisi kolom latih model dengan input kepuasan
+        'Membership Type': satisfaction_encoded, # Posisi kolom ke-3 diisi data kepuasan
         'Total Spend': total_spend,
         'Items Purchased': items,
         'Average Rating': rating,
         'Discount Applied': discount_encoded,
-        'Days Since Last Purchase': days_since,
+        'Days Since Last Purchase': 2,           # Diisi dummy angka konstan untuk posisi Satisfaction Level lama
         **city_dict
     }
     
+    # Ubah ke DataFrame
     df_input = pd.DataFrame([input_data])
     
-    # Standardisasi data menggunakan scaler bawaan
+    # Standardisasi data menggunakan scaler bawaan (Sekarang nama kolom sudah cocok 100%)
     df_input_scaled = scaler.transform(df_input)
     
     # Prediksi menggunakan model Logistic Regression
     prediction = model.predict(df_input_scaled)[0]
     
-    # OUTPUT HASIL PREDREDIKSI DI PALING BAWAH (BRONZE, SILVER, GOLD)
+    # OUTPUT HASIL PREDIKSI (BRONZE, SILVER, GOLD)
     st.subheader("🎯 Hasil Analisis Model:")
     if prediction == 0:
-        st.error("🥉 Hasil Prediksi: **BRONZE MEMBER**")
+        st.error("指标 Hasil Prediksi: **BRONZE MEMBER**")
     elif prediction == 1:
-        st.warning("🥈 Hasil Prediksi: **SILVER MEMBER**")
+        st.warning("指标 Hasil Prediksi: **SILVER MEMBER**")
     else:
-        st.success("🥇 Hasil Prediksi: **GOLD MEMBER**")
+        st.success("指标 Hasil Prediksi: **GOLD MEMBER**")
