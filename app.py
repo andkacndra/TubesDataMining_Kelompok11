@@ -84,9 +84,8 @@ if st.button("Analisis Tingkat Keanggotaan"):
     # Ubah ke DataFrame
     df_input = pd.DataFrame([input_data])
     
-    # SEKALI FIX LANGSUNG BENAR: Konversi ke NumPy Array (.values) 
-    # Langkah ini membuang nama kolom pemicu ValueError agar scaler langsung membaca murni nilai angkanya saja.
-    df_input_array = df_input.values
+    # KUNCI UTAMA SINKRONISASI: Paksa tipe data ke float64 dan ambil nilai array murninya
+    df_input_array = df_input.values.astype(np.float64)
     
     # Standardisasi data lewat array murni
     df_input_scaled = scaler.transform(df_input_array)
