@@ -63,7 +63,7 @@ if st.button("Analisis Tingkat Keanggotaan"):
     city_new_york = 1 if city == "New York" else 0
     city_san_francisco = 1 if city == "San Francisco" else 0
     
-    # KUNCI MATI: Menyusun 14 fitur dengan susunan urutan yang MUTLAK sama dengan dataset latih Vian
+    # Menyusun data sesuai urutan fitur yang diminta scaler milik Vian
     input_data = {
         'Gender': gender_encoded,
         'Age': age,
@@ -84,17 +84,12 @@ if st.button("Analisis Tingkat Keanggotaan"):
     # Ubah ke DataFrame
     df_input = pd.DataFrame([input_data])
     
-    # Memaksa ulang urutan kolom DataFrame agar presisi 100% sebelum masuk scaler
-    kolom_wajib = [
-        'Gender', 'Age', 'Total Spend', 'Items Purchased', 'Average Rating', 
-        'Discount Applied', 'Days Since Last Purchase', 'Satisfaction Level', 
-        'City_Chicago', 'City_Houston', 'City_Los Angeles', 'City_Miami', 
-        'City_New York', 'City_San Francisco'
-    ]
-    df_input = df_input[kolom_wajib]
+    # SEKALI FIX LANGSUNG BENAR: Konversi ke NumPy Array (.values) 
+    # Langkah ini membuang nama kolom pemicu ValueError agar scaler langsung membaca murni nilai angkanya saja.
+    df_input_array = df_input.values
     
-    # Standardisasi data lewat scaler.pkl
-    df_input_scaled = scaler.transform(df_input)
+    # Standardisasi data lewat array murni
+    df_input_scaled = scaler.transform(df_input_array)
     
     # Prediksi kelas target (1 = Bronze, 2 = Silver, 3 = Gold)
     prediction = model.predict(df_input_scaled)[0]
