@@ -5,7 +5,7 @@ import pickle
 
 # Configuration & Title
 st.set_page_config(page_title="E-commerce Loyalty Program & Membership Predictor", layout="centered")
-st.title("📊 E-commerce Loyalty Program & Membership Predictor")
+st.title("E-commerce Loyalty Program & Membership Predictor")
 st.write("Aplikasi ini memprediksi tingkat keanggotaan/loyalitas pelanggan baru berdasarkan model Logistic Regression kelompok kami.")
 
 # Load models safely
@@ -42,10 +42,10 @@ with col2:
     satisfaction = st.selectbox("Tingkat Kepuasan Pelanggan (Satisfaction Level)", ["Unsatisfied", "Neutral", "Satisfied"])
 
 # Pilihan Kota untuk One-Hot Encoding
-city = st.selectbox("Kota Tempat Tinggal (City)", ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"])
+city = st.selectbox("Kota Tempat Tanggal (City)", ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"])
 
 # --- PROSES TOMBOL ANALISIS ---
-if st.button("🔮 Analisis Tingkat Keanggotaan"):
+if st.button("Analisis Tingkat Keanggotaan"):
     
     # Encoding Data secara presisi sesuai dataset Vian & Okta
     gender_encoded = 0 if gender == "Female" else 1
@@ -60,7 +60,7 @@ if st.button("🔮 Analisis Tingkat Keanggotaan"):
     city_dict = {f"City_{c}": 0 for c in cities}
     city_dict[f"City_{city}"] = 1
     
-    # CRITICAL FIX: Menyusun 14 fitur eksak yang dibaca X_train milik Vian (Tanpa 'Membership Type')
+    # CRITICAL FIX: Menyusun 14 fitur dengan urutan SANGAT EKSAK sesuai X_train milik Vian
     input_data = {
         'Gender': gender_encoded,
         'Age': age,
@@ -69,7 +69,7 @@ if st.button("🔮 Analisis Tingkat Keanggotaan"):
         'Average Rating': rating,
         'Discount Applied': discount_encoded,
         'Days Since Last Purchase': days_since,
-        'Satisfaction Level': satisfaction_encoded,
+        'Satisfaction Level': satisfaction_encoded,  # Dipindah ke atas sebelum Dummy City!
         **city_dict
     }
     
@@ -83,7 +83,7 @@ if st.button("🔮 Analisis Tingkat Keanggotaan"):
     prediction = model.predict(df_input_scaled)[0]
     
     # Output Hasil Berdasarkan Label Target Vian
-    st.subheader("🎯 Hasil Analisis Model:")
+    st.subheader("Hasil Analisis Model:")
     if prediction == 1:
         st.error("🥉 Hasil Prediksi: **BRONZE MEMBER**")
     elif prediction == 2:
