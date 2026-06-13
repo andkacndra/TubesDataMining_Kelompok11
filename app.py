@@ -42,7 +42,7 @@ with col2:
     satisfaction = st.selectbox("Tingkat Kepuasan Pelanggan (Satisfaction Level)", ["Unsatisfied", "Neutral", "Satisfied"])
 
 # Pilihan Kota untuk One-Hot Encoding
-city = st.selectbox("Kota Tempat Tanggal (City)", ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"])
+city = st.selectbox("Kota Tempat Tinggal (City)", ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"])
 
 # --- PROSES TOMBOL ANALISIS ---
 if st.button("Analisis Tingkat Keanggotaan"):
@@ -55,12 +55,15 @@ if st.button("Analisis Tingkat Keanggotaan"):
     elif satisfaction == "Neutral": satisfaction_encoded = 1
     else: satisfaction_encoded = 2
     
-    # One-Hot Encoding Kota (Urutan alfabetis sesuai kolom dataset Vian)
-    cities = ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"]
-    city_dict = {f"City_{c}": 0 for c in cities}
-    city_dict[f"City_{city}"] = 1
+    # Inisialisasi One-Hot Encoding Kota secara manual agar urutannya fix
+    city_chicago = 1 if city == "Chicago" else 0
+    city_houston = 1 if city == "Houston" else 0
+    city_los_angeles = 1 if city == "Los Angeles" else 0
+    city_miami = 1 if city == "Miami" else 0
+    city_new_york = 1 if city == "New York" else 0
+    city_san_francisco = 1 if city == "San Francisco" else 0
     
-    # CRITICAL FIX: Menyusun 14 fitur dengan urutan SANGAT EKSAK sesuai X_train milik Vian
+    # KUNCI MATI: Menyusun 14 fitur dengan susunan urutan yang MUTLAK sama dengan dataset latih Vian
     input_data = {
         'Gender': gender_encoded,
         'Age': age,
@@ -69,12 +72,26 @@ if st.button("Analisis Tingkat Keanggotaan"):
         'Average Rating': rating,
         'Discount Applied': discount_encoded,
         'Days Since Last Purchase': days_since,
-        'Satisfaction Level': satisfaction_encoded,  # Dipindah ke atas sebelum Dummy City!
-        **city_dict
+        'Satisfaction Level': satisfaction_encoded,
+        'City_Chicago': city_chicago,
+        'City_Houston': city_houston,
+        'City_Los Angeles': city_los_angeles,
+        'City_Miami': city_miami,
+        'City_New York': city_new_york,
+        'City_San Francisco': city_san_francisco
     }
     
-    # Ubah ke DataFrame dengan urutan kolom yang mutlak sama
+    # Ubah ke DataFrame
     df_input = pd.DataFrame([input_data])
+    
+    # Memaksa ulang urutan kolom DataFrame agar presisi 100% sebelum masuk scaler
+    kolom_wajib = [
+        'Gender', 'Age', 'Total Spend', 'Items Purchased', 'Average Rating', 
+        'Discount Applied', 'Days Since Last Purchase', 'Satisfaction Level', 
+        'City_Chicago', 'City_Houston', 'City_Los Angeles', 'City_Miami', 
+        'City_New York', 'City_San Francisco'
+    ]
+    df_input = df_input[kolom_wajib]
     
     # Standardisasi data lewat scaler.pkl
     df_input_scaled = scaler.transform(df_input)
