@@ -5,7 +5,7 @@ import pickle
 
 # Configuration & Title
 st.set_page_config(page_title="E-commerce Loyalty Program & Membership Predictor", layout="centered")
-st.title("📊 E-commerce Loyalty Program & Membership Predictor")
+st.title("E-commerce Loyalty Program & Membership Predictor")
 st.write("Aplikasi ini memprediksi tingkat keanggotaan/loyalitas pelanggan baru berdasarkan model Logistic Regression kelompok kami.")
 
 # Load models safely
@@ -45,9 +45,9 @@ with col2:
 city = st.selectbox("Kota Tempat Tinggal (City)", ["Chicago", "Houston", "Los Angeles", "Miami", "New York", "San Francisco"])
 
 # --- PROSES TOMBOL ANALISIS ---
-if st.button("🔮 Analisis Tingkat Keanggotaan"):
+if st.button("Analisis Tingkat Keanggotaan"):
     
-    # Mapping Data secara manual dan mutlak
+    # Encoding Data secara presisi sesuai dataset Vian & Okta
     gender_encoded = 0 if gender == "Female" else 1
     discount_encoded = 1 if discount == "Yes" else 0
     
@@ -55,6 +55,7 @@ if st.button("🔮 Analisis Tingkat Keanggotaan"):
     elif satisfaction == "Neutral": satisfaction_encoded = 1
     else: satisfaction_encoded = 2
     
+    # Inisialisasi One-Hot Encoding Kota secara manual agar urutannya fix
     city_chicago = 1 if city == "Chicago" else 0
     city_houston = 1 if city == "Houston" else 0
     city_los_angeles = 1 if city == "Los Angeles" else 0
@@ -62,32 +63,39 @@ if st.button("🔮 Analisis Tingkat Keanggotaan"):
     city_new_york = 1 if city == "New York" else 0
     city_san_francisco = 1 if city == "San Francisco" else 0
     
-    # Menyusun list data mentah sesuai urutan 14 kolom scaler Vian secara eksak
-    raw_features = [
-        gender_encoded, age, total_spend, items, rating, 
-        discount_encoded, days_since, satisfaction_encoded, 
-        city_chicago, city_houston, city_los_angeles, city_miami, 
-        city_new_york, city_san_francisco
-    ]
+    # Menyusun data sesuai urutan fitur yang diminta scaler milik Vian
+    input_data = {
+        'Gender': gender_encoded,
+        'Age': age,
+        'Total Spend': total_spend,
+        'Items Purchased': items,
+        'Average Rating': rating,
+        'Discount Applied': discount_encoded,
+        'Days Since Last Purchase': days_since,
+        'Satisfaction Level': satisfaction_encoded,
+        'City_Chicago': city_chicago,
+        'City_Houston': city_houston,
+        'City_Los Angeles': city_los_angeles,
+        'City_Miami': city_miami,
+        'City_New York': city_new_york,
+        'City_San Francisco': city_san_francisco
+    }
     
-    # Ubah menjadi matriks 2D NumPy Array untuk mematikan validasi kolom sklearn
-    df_input_array = np.array([raw_features])
+    # Ubah ke DataFrame
+    df_input = pd.DataFrame([input_data])
     
-    # TAMPILKAN DEBUG DATA (Untuk intip angka sebelum masuk scaler)
-    st.info(f"💡 **Data mentah yang dikirim ke model:** {raw_features}")
+    # SEKALI FIX LANGSUNG BENAR: Konversi ke NumPy Array (.values) 
+    # Langkah ini membuang nama kolom pemicu ValueError agar scaler langsung membaca murni nilai angkanya saja.
+    df_input_array = df_input.values
     
     # Standardisasi data lewat array murni
     df_input_scaled = scaler.transform(df_input_array)
-    
-    # Cek peluang probabilitas tiap kelas (Bronze, Silver, Gold)
-    probabilities = model.predict_proba(df_input_scaled)[0]
-    st.info(f"📊 **Peluang Probabilitas Kelas [Bronze, Silver, Gold]:** {np.round(probabilities, 4)}")
     
     # Prediksi kelas target (1 = Bronze, 2 = Silver, 3 = Gold)
     prediction = model.predict(df_input_scaled)[0]
     
     # Output Hasil Berdasarkan Label Target Vian
-    st.subheader("🎯 Hasil Analisis Model:")
+    st.subheader("Hasil Analisis Model:")
     if prediction == 1:
         st.error("🥉 Hasil Prediksi: **BRONZE MEMBER**")
     elif prediction == 2:
